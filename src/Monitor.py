@@ -1,10 +1,10 @@
-import commands
+import subprocess
 
 class SysInfo():
 
 	@staticmethod
 	def getCpuInfo():
-		cmdResult = commands.getoutput("top -bn1").split('\n')
+		cmdResult = subprocess.getoutput("top -bn1").split('\n')
 		if len(cmdResult) >= 3:
 			cpuInfo = cmdResult[2].split()
 			if len(cpuInfo) >= 8:
@@ -21,7 +21,7 @@ class SysInfo():
 
 	@staticmethod
 	def getMemInfo():
-		cmdResult = commands.getoutput('free').split('\n')
+		cmdResult = subprocess.getoutput('free').split('\n')
 		memInfo = (cmdResult[1].split()[1:8])
 		return {
 			'total'  : int(memInfo[0]),
@@ -40,13 +40,13 @@ class SysInfo():
 
 	@staticmethod	
 	def getGpuTemperature():
-		gpuTemperature = commands.getoutput('/opt/vc/bin/vcgencmd measure_temp')
+		gpuTemperature = subprocess.getoutput('/opt/vc/bin/vcgencmd measure_temp')
 		return float(gpuTemperature.replace('temp=', '').replace('\'C', ''))
 
 	@staticmethod
 	def getNetInfo():
 		result = []
-		cmdResult = commands.getoutput('ifconfig').split('\n')
+		cmdResult = subprocess.getoutput('ifconfig').split('\n')
 		netName = ''
 		for line in cmdResult:
 			temp = line.split()
@@ -62,7 +62,7 @@ class SysInfo():
 
 	@staticmethod
 	def getDiskInfo():
-		cmdResult = commands.getoutput('df -h /').split('\n')
+		cmdResult = subprocess.getoutput('df -h /').split('\n')
 		diskInfo = cmdResult[1].split()
 		return {
 			'size':float(diskInfo[1].replace('G', '')),
@@ -72,8 +72,8 @@ class SysInfo():
 
 
 if __name__ == "__main__":
-	print "CPU Temperature: ", str(SysInfo.getCpuTemperature())
-	print "GPU Temperature: ", str(SysInfo.getGpuTemperature())
-	print "CPU Used: ", str(SysInfo.getCpuInfo()['used'])
-	print "MEM Total: ", str(SysInfo.getMemInfo()['total'])
-	print "IP Info: ", SysInfo.getNetInfo()[0]['name'], SysInfo.getNetInfo()[0]['ip']
+	print("CPU Temperature: ", str(SysInfo.getCpuTemperature()))
+	print("GPU Temperature: ", str(SysInfo.getGpuTemperature()))
+	print("CPU Used: ", str(SysInfo.getCpuInfo()['used']))
+	print("MEM Total: ", str(SysInfo.getMemInfo()['total']))
+	print("IP Info: ", SysInfo.getNetInfo()[0]['name'], SysInfo.getNetInfo()[0]['ip'])

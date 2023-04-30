@@ -2,8 +2,8 @@ from time import sleep
 from Adafruit_CharLCDPlate import Adafruit_CharLCDPlate
 from Monitor import SysInfo
 from Weather import Weather
-import thread
-import commands
+import _thread
+import subprocess
 
 class Display():
 
@@ -411,7 +411,7 @@ class Display():
 		self.debug = debug
 		# Init AutoRefeashMethods
 		self.AutoRefreshMethod = None
-		thread.start_new_thread(self.autoRefresh, ())
+		_thread.start_new_thread(self.autoRefresh, ())
 
 	def loadCharset(self, charset = 'default'):
 		for i, item in enumerate(self.CHAR_SET[charset]):
@@ -419,16 +419,16 @@ class Display():
 
 	def autoRefresh(self):
 		if(self.debug):
-			print 'Auto refresh thread started!'
+			print('Auto refresh thread started!')
 		while True:
 			if self.AutoRefreshMethod != None:
 				try:
 					self.EventMethods[self.AutoRefreshMethod]()
-				except Exception, e:
+				except Exception as e:
 					if(self.debug):
-						print str(e)
+						print(str(e))
 				if(self.debug):
-					print self.AutoRefreshMethod, ' fired!'
+					print(self.AutoRefreshMethod, ' fired!')
 			sleep(self.AUTO_REFRESH_PERIOD)
 		
 	def clear(self):
@@ -452,21 +452,21 @@ class Display():
 		else:
 			try:
 				self.EventMethods['EventMethods_' + str(self.curMenu) + '_' + str(self.curPage)]()
-			except Exception, e:
+			except Exception as e:
 				if(self.debug):
 					self.lcd.message(str(e))
-					print str(e)
+					print(str(e))
 				else:
 					self.lcd.message('ERROR!\nPlease try again')
 			
 	def changeState(self, op):
 		if self.debug:
-			print 'Op: ', str(op)
+			print('Op: ', str(op))
 		self.AutoRefreshMethod = None
 		if op in self.STT[self.curMenu][self.curPage]:
 			(self.curMenu, self.curPage) = self.STT[self.curMenu][self.curPage][op]
 			if self.debug:
-				print 'Change state to:', str(self.curMenu), ' - ' , str(self.curPage)
+				print('Change state to:', str(self.curMenu), ' - ' , str(self.curPage))
 
 	def begin(self):
 		# Init screen
@@ -538,13 +538,13 @@ class Display():
 		self.lcd.noCursor()
 		self.AutoRefreshMethod = 'EventMethods_2_1'
 		if(self.debug):
-			print 'Temperature bar: ' + str(cursor)
+			print('Temperature bar: ' + str(cursor))
 
 	#==============================#
 	# ---------DISK INFO-----------#
 	#==============================#
 	def EventMethods_DiskInfo(self):
-		blackGridNum = (10 * SysInfo.getDiskInfo()['use%'] + 50) / 100
+		blackGridNum = int((10 * SysInfo.getDiskInfo()['use%'] + 50) / 100)
 		line_2 = ''
 		for i in range(0, blackGridNum):
 			line_2 = line_2 + chr(5)
@@ -606,7 +606,7 @@ class Display():
 					self.message('Reboot\nAfter ' + str(5 - i) + ' Sec' + (i % 3 + 1) * '.')
 					sleep(1)
 				self.exit()
-				commands.getoutput('sudo reboot')
+				subprocess.getoutput('sudo reboot')
 		else:
 			self.message('Reboot now?\n(No/Yes)')
 			if choice == 0:
@@ -623,7 +623,7 @@ class Display():
 					self.message('Power Off\nAfter ' + str(5 - i) + ' Sec' + (i % 3 + 1) * '.')
 					sleep(1)
 				self.exit()
-				commands.getoutput('sudo poweroff')
+				subprocess.getoutput('sudo poweroff')
 		else:
 			self.message('Power off now?\n(No/Yes)')
 			if choice == 0:
@@ -636,7 +636,7 @@ class Display():
 	#==============================#
 	def EventMethods_Weather(self):
 		weatherInfo = Weather()
-		self.message('Beijing  ' + weatherInfo.getUpdateTime() + '\n  ' + str(weatherInfo.getTemperature()) + chr(4) + 'C   RH:' + weatherInfo.getRH())
+		self.message('Tokyo ' + weatherInfo.getUpdateTime() + '\n' + str(weatherInfo.getTemperature()) + chr(4) + 'C WS:' + str(weatherInfo.getWindSpeed()))
 		self.AutoRefreshMethod = 'EventMethods_5_1'
 
 	#==============================#

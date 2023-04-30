@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import json
 
 class Weather():
 	
-	def __init__(self, cityCode = '101010100'):
-		self.cityCode = cityCode
-		request = urllib.urlopen('http://www.weather.com.cn/data/sk/' + cityCode + '.html')
-		self.weather = json.loads(request.read())
+	def __init__(self):
+
+		# ref: https://open-meteo.com/en/docs , using timezone: JST
+		request = urllib.request.urlopen("https://api.open-meteo.com/v1/forecast?latitude=35.69&longitude=139.69&current_weather=true&windspeed_unit=ms&forecast_days=1&timezone=Asia%2FTokyo")
+		self.weather_data = json.loads(request.read())
 
 	def getTemperature(self):
-		return int(self.weather['weatherinfo']['temp'])
+		return self.weather_data["current_weather"]["temperature"]
 
-	def getRH(self):
-		return self.weather['weatherinfo']['SD']
+	def getWindSpeed(self):
+		return self.weather_data["current_weather"]["windspeed"]
 
 	def getUpdateTime(self):
-		return self.weather['weatherinfo']['time']
+		# 2023-01-12T12:00 -> 01-12 1200
+		return self.weather_data["current_weather"]["time"].replace("T", " ").replace(":", "")[5:]
+
 
 if __name__ == "__main__":
 	weather = Weather()
-	print "BEGING: " + str(weather.getTemperature()) + ' ' + weather.getRH() + ' ' + weather.getUpdateTime()
+	print(f"Tokyo: {weather.getTemperature()} {weather.getWindSpeed()} {weather.getUpdateTime()}")
